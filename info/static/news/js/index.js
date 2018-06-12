@@ -10,22 +10,22 @@ $(function () {
 
     // 首页分类切换
     $('.menu li').click(function () {
-        var clickCid = $(this).attr('data-cid')
+        var clickCid = $(this).attr('data-cid');
         $('.menu li').each(function () {
             $(this).removeClass('active')
-        })
-        $(this).addClass('active')
+        });
+        $(this).addClass('active');
 
         if (clickCid != currentCid) {
             // 记录当前分类id
-            currentCid = clickCid
+            currentCid = clickCid;
 
             // 重置分页参数
-            cur_page = 1
-            total_page = 1
+            cur_page = 1;
+            total_page = 1;
             updateNewsData()
         }
-    })
+    });
 
     //页面滚动加载相关
     $(window).scroll(function () {
@@ -44,9 +44,14 @@ $(function () {
 
         if ((canScrollHeight - nowScroll) < 100) {
             // TODO 判断页数，去更新新闻数据
+            if (data_querying == false && cur_page <= total_page){
+                data_querying = true;
+                cur_page += 1;
+                updateNewsData();
+            }
         }
     })
-})
+});
 
 function updateNewsData() {
     // TODO 更新新闻数据
@@ -56,20 +61,26 @@ function updateNewsData() {
         // 不需要传入per_page,因为默认10
     };
 
-    $.get('/news_list', params, function (response) {
+    $.get('/news/news_all', params, function (response) {
+        total_page = response.context.tpage;
         if (response.errno == '0') {
+            data_querying = false;
+            // # 注意翻页的核心代码 , 因为当点击切换类型时候,会出现重置页数的
+            if(cur_page == 1){
+                $(".list_con").html("")
+            }
             // 获取数据成功，使用新的数据渲染界面
-            for (var i=0;i<response.data.news_dict_List.length;i++) {
-                var news = response.data.news_dict_List[i]
-                var content = '<li>'
+            for (var i=0;i<response.context.news.length;i++) {
+                var news = response.context.news[i];
+                var content = '<li>';
                 content += '<a href="#" class="news_pic fl"><img src="' + news.index_image_url + '?imageView2/1/w/170/h/170"></a>'
-                content += '<a href="#" class="news_title fl">' + news.title + '</a>'
-                content += '<a href="#" class="news_detail fl">' + news.digest + '</a>'
-                content += '<div class="author_info fl">'
-                content += '<div class="source fl">来源：' + news.source + '</div>'
-                content += '<div class="time fl">' + news.create_time + '</div>'
-                content += '</div>'
-                content += '</li>'
+                content += '<a href="#" class="news_title fl">' + news.title + '</a>';
+                content += '<a href="#" class="news_detail fl">' + news.digest + '</a>';
+                content += '<div class="author_info fl">';
+                content += '<div class="source fl">来源：' + news.source + '</div>';
+                content += '<div class="time fl">' + news.create_time + '</div>';
+                content += '</div>';
+                content += '</li>';
                 // append表示将新的数据追加到旧的数据的后面；html表示将新的数据替换到旧的数据的后面；
                 $(".list_con").append(content)
             }

@@ -22,23 +22,24 @@
                 <li data-cid="6"><a href="javascript:;">公司</a></li>
             </ul>
 {#        主页右上角处理#}
-
+            {% if context.user %}
                 <div class="user_login fr">
                     <img src="../../static/news/images/person01.png" class="lgin_pic">
-                    <a href="#"></a>
-                    <a href="javascript:;" onclick="logout()">退出</a>
+                    <a href="#">{{ context.user.nick_name }}</a>
+                    <a href="javascript:;" onclick="logout();">退出</a>
                 </div>
-
+            {% else %}
                 <div class="user_btns fr">
                     <a href="javascript:;" class="login_btn">登录</a> / <a href="javascript:;" class="register_btn">注册</a>
                 </div>
-
+            {% endif %}
         </div>
     </div>
     
     <div class="conter_con">
         <ul class="list_con fl">
 {#            使用js动态的渲染服务器响应的主页新闻列表数据#}
+
         </ul>
         <div class="rank_con fr">
             <div class="rank_title">

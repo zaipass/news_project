@@ -3,7 +3,7 @@ from config import configs
 from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy
 from redis import StrictRedis
-from flask_wtf import CSRFProtect
+from flask_wtf import CSRFProtect, csrf
 from logging.handlers import RotatingFileHandler
 import logging
 
@@ -26,6 +26,13 @@ def create_app(config_name):
     Session(app)
 
     CSRFProtect(app)
+
+    # 生成 CSRF_token
+    @app.after_request
+    def after_request(response):
+        csrf_token = csrf.generate_csrf()
+        response.set_cookie("csrf_token", csrf_token)
+        return response
 
     from info.news import news_blue
     app.register_blueprint(news_blue)
