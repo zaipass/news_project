@@ -61,7 +61,7 @@ function updateNewsData() {
         // 不需要传入per_page,因为默认10
     };
 
-    $.get('/news/news_all', params, function (response) {
+    $.get('/news_all', params, function (response) {
         total_page = response.context.tpage;
         if (response.errno == '0') {
             data_querying = false;
@@ -73,9 +73,9 @@ function updateNewsData() {
             for (var i=0;i<response.context.news.length;i++) {
                 var news = response.context.news[i];
                 var content = '<li>';
-                content += '<a href="#" class="news_pic fl"><img src="' + news.index_image_url + '?imageView2/1/w/170/h/170"></a>'
-                content += '<a href="#" class="news_title fl">' + news.title + '</a>';
-                content += '<a href="#" class="news_detail fl">' + news.digest + '</a>';
+                content += '<a href="/detail/'+news.id+'" class="news_pic fl"><img src="' + news.index_image_url + '?imageView2/1/w/170/h/170"></a>'
+                content += '<a href="/detail/'+news.id+'" class="news_title fl">' + news.title + '</a>';
+                content += '<a href="/detail/'+news.id+'" class="news_detail fl">' + news.digest + '</a>';
                 content += '<div class="author_info fl">';
                 content += '<div class="source fl">来源：' + news.source + '</div>';
                 content += '<div class="time fl">' + news.create_time + '</div>';
@@ -88,4 +88,8 @@ function updateNewsData() {
             alert(response.errmsg);
         }
     });
+}
+
+function list_news_hot(){
+    $.get("/news_hot");
 }

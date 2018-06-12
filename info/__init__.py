@@ -42,6 +42,10 @@ def create_app(config_name):
     # 开启日志
     create_log(config_name)
 
+    # 添加过滤器
+    from info.comment import rank
+    app.add_template_filter(rank)
+
     return app
 
 
