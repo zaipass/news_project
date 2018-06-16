@@ -123,24 +123,70 @@ $(function(){
         if(sHandler.indexOf('comment_up')>=0)
         {
             var $this = $(this);
+            var commentId = $this.attr("data-commentId");
+            var com_action = "";
             if(sHandler.indexOf('has_comment_up')>=0)
             {
                 // 如果当前该评论已经是点赞状态，再次点击会进行到此代码块内，代表要取消点赞
-                $this.removeClass('has_comment_up')
+                com_action = "unlike";
+
+                var cparams = {
+                    "action": com_action,
+                    "comment_id": commentId
+                };
+
+                $.ajax({
+                    url:"/liked",
+                    type:'post', // 请求方法
+                    data:JSON.stringify(cparams), // 请求参数
+                    contentType:'application/json', // 请求数据类型
+                    headers:{'X-CSRFToken':getCookie('csrf_token')},
+                    success:function(response){
+                        if(response.errno == "0"){
+                            $this.html(response.liked);
+                            $this.removeClass('has_comment_up');
+                        }else{
+                            alert(response.errmsg);
+                        }
+                    }
+                })
+
             }else {
-                $this.addClass('has_comment_up')
+                com_action = "liked";
+
+                var cparams = {
+                    "action": com_action,
+                    "comment_id": commentId
+                };
+
+                $.ajax({
+                    url:"/liked",
+                    type:'post', // 请求方法
+                    data:JSON.stringify(cparams), // 请求参数
+                    contentType:'application/json', // 请求数据类型
+                    headers:{'X-CSRFToken':getCookie('csrf_token')},
+                    success:function(response){
+                        if(response.errno == "0"){
+                            $this.html(response.liked);
+                            $this.addClass('has_comment_up');
+                        }else{
+                            alert(response.errmsg);
+                        }
+                    }
+                })
+
             }
         }
 
         if(sHandler.indexOf('reply_sub')>=0)
         {
             // alert('回复评论')
-            var newsId = $(".reply_form").attr("data-newsId");
+            var newsId = $(this).parent().attr("data-newsId");
 
             // 注意: >>>> $('reply_sub').val() 是只能获取一次表单内容
             var content = $(this).prev().val();
 
-            var parentId = $(".reply_form").attr("data-parentId");
+            var parentId = $(this).parent().attr("data-parentId");
 
             var params = {
                 "news_id": newsId,
@@ -176,7 +222,8 @@ $(function(){
                             '<a href="javascript:;" class="comment_reply fr">回复</a> ' +
                             '<from class="reply_form fl" data-parentId='+response.data.comment.id+
                             ' data-newsId='+response.data.comment.news_id+' > ' +
-                            '<textarea  class="reply_input"></textarea> ' +
+                            '<textarea  class="reply_input">'+response.data.comment.news_id+'.....' +
+                            ''+response.data.comment.id+'</textarea> ' +
                             '<input type="submit" name="" value="回复" class="reply_sub fr"> ' +
                             '<input type="reset" name="" value="取消" class="reply_cancel fr"> </from> </div>';
                         $(".reply_input").val('');
@@ -192,6 +239,26 @@ $(function(){
 
         // 关注当前新闻作者
     $(".focus").click(function () {
+        // 发布此新闻用户id
+        var authorId = $(this).attr("data-authorId");
+        var pam = {
+            "author_id":authorId
+        };
+
+        $.ajax({
+            url: "/follow",
+            type: 'post', // 请求方法
+            data: JSON.stringify(pam), // 请求参数
+            contentType: 'application/json', // 请求数据类型
+            headers: {'X-CSRFToken': getCookie('csrf_token')},
+            success:function(response){
+                if(response.errno == "0"){
+                    alert(response.errmsg);
+                }else{
+                    alert(response.errmsg);
+                }
+            }
+        })
 
     });
 

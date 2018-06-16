@@ -4,8 +4,83 @@ from info.comment import user_model
 from info.utils import models
 from info.utils import constants
 from info.utils.response_code import RET
+from sqlalchemy import and_
 from info import db
 import datetime
+
+
+# 关注用户
+@news_blue.route("/follow", methods=["POST"])
+@user_model
+def follow():
+    user = g.user
+
+    if not user:
+        return jsonify(errno=RET.NODATA, errmsg="用户未登录")
+
+    author_id = request.json.get("author_id")
+
+    # 需要区分关注者和被关注者
+    # 自己 关注 , 发布的 被关注
+    # TODO 关注
+
+
+
+
+# 点赞和取消赞
+@news_blue.route("/liked", methods=["POST"])
+@user_model
+def liked():
+    user = g.user
+
+    if not user:
+        return jsonify(errno=RET.NODATA, errmsg="用户未登录")
+
+    action = request.json.get("action")
+
+    comment_id = request.json.get("comment_id")
+
+    if action not in ["liked", "unlike"]:
+        return jsonify(errno=RET.PARAMERR, errmsg="参数错误")
+
+    try:
+        comments_object = models.Comment.query.filter(models.Comment.id == comment_id).first()
+        com_like = models.CommentLike.query.filter(and_(models.CommentLike.comment_id == comment_id,
+                                                        models.CommentLike.user_id == user.id)).first()
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg="数据库查询错误")
+
+    if action == "unlike":
+        comments_object.like_count -= 1
+
+        try:
+            db.session.delete(com_like)
+            db.session.commit()
+        except Exception as e:
+            current_app.logger.error(e)
+            return jsonify(errno=RET.DBERR, errmsg="数据库删除错误")
+
+        msg = "取消点赞成功"
+
+    else:
+        comment_like = models.CommentLike()
+        comment_like.create_time = datetime.datetime.now()
+        comment_like.comment_id = comment_id
+        comment_like.user_id = user.id
+
+        comments_object.like_count += 1
+
+        try:
+            db.session.add(comment_like)
+            db.session.commit()
+        except Exception as e:
+            current_app.logger.error(e)
+            return jsonify(errno=RET.DBERR, errmsg="数据库添加错误")
+
+        msg = "点赞成功"
+
+    return jsonify(errno=RET.OK, errmsg=msg, liked=comments_object.like_count)
 
 
 # 评论
@@ -40,6 +115,9 @@ def comments():
     comment.create_time = datetime.datetime.now()
 
     if parent_id:
+
+        print(parent_id, "-----")
+
         comment.parent_id = parent_id
 
     try:
@@ -128,6 +206,8 @@ def detail(num_id):
 
     is_collected = False
 
+    list_comment_id = []
+
     if user:
         # 优化收藏, 判断当前用户是否收藏了此新闻
         try:
@@ -143,6 +223,17 @@ def detail(num_id):
         if num_id in news_id_list:
             is_collected = True
 
+        # 判断当前用户是否对此评论点赞
+        # 1. 获取全部点赞的评论 2. 判断
+        all_comments = None
+        try:
+            all_comments = models.CommentLike.query.filter(models.CommentLike.user_id == user.id).all()
+        except Exception as e:
+            current_app.logger.error(e)
+
+        #  # 1. 获取全部点赞的评论
+        list_comment_id = [value.comment_id for value in all_comments]
+
     # 显示评论
     try:
         news_comments = models.Comment.query.order_by(models.Comment.create_time.desc()).\
@@ -152,6 +243,12 @@ def detail(num_id):
         return jsonify(errno=RET.DBERR, errmsg="数据库查询信息错误")
 
     news_comments = [comments_object.to_dict() for comments_object in news_comments]
+
+    # 添加一个判断是否点赞的字段
+    for comments_current in news_comments:
+        comments_current["is_liked"] = False
+        if comments_current["id"] in list_comment_id:
+            comments_current["is_liked"] = True
 
     context = {
         "user": user,

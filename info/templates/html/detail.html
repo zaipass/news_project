@@ -25,8 +25,8 @@
         <div class="author_resume">个性签名:{{ context.detail_news.author.signature }}</div>
         <div class="writings"><span>总篇数</span><b>{{ context.detail_news.author.news_count }}</b></div>
         <div class="follows"><span>粉丝</span><b>{{ context.detail_news.author.followers_count }}</b></div>
-        <a href="javascript:;" class="focus fr">关注</a>
-        <a href="javascript:;" class="focused fr"><span class="out">已关注</span><span class="over">取消关注</span></a>
+        <a href="javascript:;" class="focus fr" data-authorId="{{ context.detail_news.author.id }}">关注</a>
+        <a href="javascript:;" class="focused fr" data-authorId="{{ context.detail_news.author.id }}"><span class="out">已关注</span><span class="over">取消关注</span></a>
     </div>
     {% endif %}
 {% endblock userBlock %}
@@ -36,7 +36,8 @@
     <div class="detail_con fl">
         <h3>{{ context.detail_news.title }}</h3>
         <div class="detail_about clearfix">
-            <span class="time_souce fl">{{ context.detail_news.create_time }} 来源: {{ context.detail_news.source }}</span>
+            <span class="time_souce fl">{{ context.detail_news.create_time }}
+                来源: {{ context.detail_news.source }}</span>
             <span class="comment fr">{{ context.detail_news.comments_count }}</span>
         </div>
         {{ context.detail_news.content | safe }}
@@ -46,7 +47,8 @@
             <a href="javascript:;" class="collected block-center" style="display: none" data-news="{{ context.detail_news.id }}" >
                 <span class="out">已收藏</span><span class="over">取消收藏</span></a>
         {% else %}
-            <a href="javascript:;" class="collection block-center" style="display: none" data-news="{{ context.detail_news.id }}">收藏</a>
+            <a href="javascript:;" class="collection block-center" style="display: none" data-news="{{ context.detail_news.id }}">
+                收藏</a>
             <a href="javascript:;" class="collected block-center" data-news="{{ context.detail_news.id }}" >
                 <span class="out">已收藏</span><span class="over">取消收藏</span></a>
         {% endif %}
@@ -57,9 +59,13 @@
         </div>
         {% else %}
         <form action="" class="comment_form" data-newsId={{ context.detail_news.id }}>
-            <div class="person_pic">
+        <div class="person_pic">
+            {% if context.user.avatar_url %}
                 <img src="{{ context.user.avatar_url }}" alt="用户图标">
-            </div>
+            {% else %}
+                <img src="../../static/news/images/worm.jpg" alt="用户图标">
+            {% endif %}
+        </div>
             <textarea placeholder="请发表您的评论" class="comment_input"></textarea>
             <input type="submit" name="" value="评 论" class="comment_sub">
         </form>
@@ -94,7 +100,10 @@
                 </div>
                 {% endif %}
                 <div class="comment_time fl">{{ comments.create_time }}</div>
-                <a href="javascript:;" class="comment_up has_comment_up fr">{{ comments.like_count }}</a>
+                <a href="javascript:;" class="comment_up
+                {% if comments.is_liked %}has_comment_up{% endif %} fr"
+                   data-commentId="{{ comments.id }}">
+                    {{ comments.like_count }}</a>
                 <a href="javascript:;" class="comment_reply fr">回复</a>
                 <from class="reply_form fl" data-parentId={{ comments.id }} data-newsId={{ context.detail_news.id }} >
                     <textarea  class="reply_input"></textarea>
@@ -102,6 +111,7 @@
                     <input type="reset" name="" value="取消" class="reply_cancel fr">
                 </from>
             </div>
+
         {% endfor %}
         </div>
 

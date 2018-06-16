@@ -10,7 +10,7 @@
 
     <div class="header_con">
         <div class="header">
-            <a href="#" class="logo fl"><img src="../static/news/images/logo.png" alt="logo"></a>
+            <a href="{{ url_for("news.index") }}" class="logo fl"><img src="../static/news/images/logo.png" alt="logo"></a>
             {% block navBlock %}
             {% endblock navBlock %}
 {#        主页右上角处理#}
