@@ -242,7 +242,8 @@ $(function(){
         // 发布此新闻用户id
         var authorId = $(this).attr("data-authorId");
         var pam = {
-            "author_id":authorId
+            "author_id":authorId,
+            "action": "fo"
         };
 
         $.ajax({
@@ -254,6 +255,8 @@ $(function(){
             success:function(response){
                 if(response.errno == "0"){
                     alert(response.errmsg);
+                    $('.focused').show();
+                    $('.focus').hide();
                 }else{
                     alert(response.errmsg);
                 }
@@ -264,6 +267,28 @@ $(function(){
 
     // 取消关注当前新闻作者
     $(".focused").click(function () {
+        // 发布此新闻用户id
+        var authorId = $(this).attr("data-authorId");
+        var pam = {
+            "author_id":authorId,
+            "action": "unfo"
+        };
 
+        $.ajax({
+            url: "/follow",
+            type: 'post', // 请求方法
+            data: JSON.stringify(pam), // 请求参数
+            contentType: 'application/json', // 请求数据类型
+            headers: {'X-CSRFToken': getCookie('csrf_token')},
+            success:function(response){
+                if(response.errno == "0"){
+                    alert(response.errmsg);
+                    $('.focused').hide();
+                    $('.focus').show();
+                }else{
+                    alert(response.errmsg);
+                }
+            }
+        })
     })
 });

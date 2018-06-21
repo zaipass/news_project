@@ -19,12 +19,46 @@ def follow():
         return jsonify(errno=RET.NODATA, errmsg="用户未登录")
 
     author_id = request.json.get("author_id")
+    action = request.json.get('action')
 
     # 需要区分关注者和被关注者
     # 自己 关注 , 发布的 被关注
-    # TODO 关注
+    # user.id    author_id
+    # 用户的所有粉丝 followers
+    print(author_id, user.id)
+    try:
+        author = models.User.query.get(author_id)
 
+        author_fans = author.followers
 
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg="数据库中没有")
+
+    if not author:
+        return jsonify(errno=RET.NODATA, errmsg="作者未查询到")
+
+    # 查询 目前的用户是否关注了 此作者
+    fans_list = [fans.id for fans in author_fans]
+
+    print(fans_list)
+
+    try:
+        if action == 'fo':
+            author.followers.append(user)
+            msg = "关注成功"
+        else:
+            if user.id in fans_list:
+                author.followers.remove(user)
+                msg = '取消关注'
+            else:
+                msg = '未关注'
+        db.session.commit()
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg="数据库添加关注失败")
+
+    return jsonify(errno=RET.OK, errmsg=msg)
 
 
 # 点赞和取消赞
@@ -206,6 +240,8 @@ def detail(num_id):
 
     is_collected = False
 
+    is_followed = False
+
     list_comment_id = []
 
     if user:
@@ -234,6 +270,23 @@ def detail(num_id):
         #  # 1. 获取全部点赞的评论
         list_comment_id = [value.comment_id for value in all_comments]
 
+        # 判断是否关注
+        news_detail = news.to_dict()
+        print(news_detail)
+        author_id = news_detail["author"]['id']
+
+        try:
+            author = models.User.query.get(author_id)
+            author_fans = author.followers
+        except Exception as e:
+            current_app.logger.error(e)
+            return jsonify(errno=RET.DBERR, errmsg="数据库错误")
+
+        fans_list = [fans.id for fans in author_fans]
+
+        if user.id in fans_list:
+            is_followed = True
+
     # 显示评论
     try:
         news_comments = models.Comment.query.order_by(models.Comment.create_time.desc()).\
@@ -255,6 +308,7 @@ def detail(num_id):
         "news": news_list,
         "detail_news": news.to_dict(),
         "is_collected": is_collected,
+        'is_followed': is_followed,
         "news_comments": news_comments
     }
 

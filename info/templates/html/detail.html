@@ -25,8 +25,20 @@
         <div class="author_resume">个性签名:{{ context.detail_news.author.signature }}</div>
         <div class="writings"><span>总篇数</span><b>{{ context.detail_news.author.news_count }}</b></div>
         <div class="follows"><span>粉丝</span><b>{{ context.detail_news.author.followers_count }}</b></div>
-        <a href="javascript:;" class="focus fr" data-authorId="{{ context.detail_news.author.id }}">关注</a>
-        <a href="javascript:;" class="focused fr" data-authorId="{{ context.detail_news.author.id }}"><span class="out">已关注</span><span class="over">取消关注</span></a>
+        {% if context.user.id == context.detail_news.author.id %}
+            <a href="javascript:;" class="fr" >自己发布</a>
+        {% elif context.is_followed %}
+          <a href="javascript:;" class="focused fr" data-authorId="{{ context.detail_news.author.id }}">
+            <span class="out">已关注</span><span class="over">取消关注</span></a>
+
+            <a href="javascript:;" class="focus fr" data-authorId="{{ context.detail_news.author.id }}" style="display: none">关注</a>
+        {% else %}
+            <a href="javascript:;" class="focus fr" data-authorId="{{ context.detail_news.author.id }}">关注</a>
+
+            <a href="javascript:;" class="focused fr" data-authorId="{{ context.detail_news.author.id }}" style="display: none">
+            <span class="out">已关注</span><span class="over">取消关注</span></a>
+
+        {% endif %}
     </div>
     {% endif %}
 {% endblock userBlock %}
