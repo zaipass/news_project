@@ -30,7 +30,7 @@
                     <img src="../static/news/images/person01.png" class="lgin_pic">
                 {% endif %}
 
-                    <a href="#">{{ context.user.nick_name }}</a>
+                    <a href="{{ url_for('users.index') }}">{{ context.user.nick_name }}</a>
                     <a href="javascript:;" onclick="logout();">退出</a>
                 </div>
             {% else %}

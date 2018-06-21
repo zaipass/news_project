@@ -38,6 +38,8 @@ def create_app(config_name):
     app.register_blueprint(news_blue)
     from info.passport import passport_blue
     app.register_blueprint(passport_blue)
+    from info.user import user_blue
+    app.register_blueprint(user_blue)
 
     # 开启日志
     create_log(config_name)
