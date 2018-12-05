@@ -7,6 +7,10 @@ from flask_wtf import CSRFProtect, csrf
 from logging.handlers import RotatingFileHandler
 import logging
 
+from pymysql import install_as_MySQLdb
+
+install_as_MySQLdb()
+
 
 db = SQLAlchemy()
 redis_store = None
