@@ -14,7 +14,7 @@ class BaseConfig(object):
     REDIS_PORT = 6379
 
     # mysql 数据库的参数
-    SQLALCHEMY_DATABASE_URI = "mysql://root:mysql@localhost:3306/sql_day"
+    SQLALCHEMY_DATABASE_URI = "mysql://root:mysql@localhost:3306/news_demo"
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
